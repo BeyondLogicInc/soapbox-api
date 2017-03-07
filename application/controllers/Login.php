@@ -14,52 +14,52 @@ class Login extends CI_Controller {
         $this->user = $this->facebook->getUser();
     }
 
-     public function index(){
-         if(is_logged_in()){
-             redirect(base_url(),'location');
-         }
-
-         if ($this->user) {
-             $access_token = $this->facebook->getAccessToken();
-             $param_token = array('access_token' => $access_token);
-             $data['user_profile'] = $this->facebook->api('/me?fields=name,first_name,last_name,gender,link,email,cover','GET',$param_token);
-             $data['logout_url'] = $this->facebook->getLogoutUrl(array('next' => base_url() . 'Logout'));
-             $this->load->model('Login_model');
-             $result = $this->Login_model->is_user_from_fb($data['user_profile']['email']);
-             if($result){
-                 $newdata = array("userid"=>$result['srno'], "username"=>$result['username'], "fname"=>$result['fname'], "lname"=>$result['lname'], "avatarpath"=>$result['avatarpath']);
-                 $this->session->set_userdata($newdata);                
-             }
-             else{
-                 $username = $data['user_profile']['first_name'] . "_" . $data['user_profile']['last_name'] . "_" . randomStr();
-                 $username = substr($username, 0, 25);
-                 while($this->Login_model->check_username($username)){
-                     $username = $data['user_profile']['first_name'] . "_" . $data['user_profile']['last_name'] . "_" . randomStr();
-                     $username = substr($username, 0, 25);                    
-                 }
-                 $password = randomStr();
-                 $user['username'] = strtolower($username);
-                 $user['password'] = md5($password);
-                 $user['fname'] = ucfirst($data['user_profile']['first_name']);
-                 $user['lname'] = ucfirst($data['user_profile']['last_name']);
-                 $user['gender'] = $data['user_profile']['gender'];
-                 $user['avatarpath'] = 'https://graph.facebook.com/' . $data['user_profile']['id'] . '/picture?type=large';
-                 $user['email'] = $data['user_profile']['email'];
-                
-                 $result = $this->Login_model->new_fb_user($user);
-                 if($result){
-                     $newdata = array("userid"=>$result['srno'], "username"=>$result['username'], "fname"=>$result['fname'], "lname"=>$result['lname'], "avatarpath"=>$result['avatarpath']);
-                     $this->session->set_userdata($newdata);
-                     redirect(base_url(),'location');
-                 }
-             }
-             $this->load->view('index_view_1', $data);
-         } else {
-             // Store users facebook login url
-             $data['login_url'] = $this->facebook->getLoginUrl(array('scope' => 'email'));
-             $this->load->view('login_view', $data);
-         }
-     }
+//     public function index(){
+//         if(is_logged_in()){
+//             redirect(base_url(),'location');
+//         }
+//
+//         if ($this->user) {
+//             $access_token = $this->facebook->getAccessToken();
+//             $param_token = array('access_token' => $access_token);
+//             $data['user_profile'] = $this->facebook->api('/me?fields=name,first_name,last_name,gender,link,email,cover','GET',$param_token);
+//             $data['logout_url'] = $this->facebook->getLogoutUrl(array('next' => base_url() . 'Logout'));
+//             $this->load->model('Login_model');
+//             $result = $this->Login_model->is_user_from_fb($data['user_profile']['email']);
+//             if($result){
+//                 $newdata = array("userid"=>$result['srno'], "username"=>$result['username'], "fname"=>$result['fname'], "lname"=>$result['lname'], "avatarpath"=>$result['avatarpath']);
+//                 $this->session->set_userdata($newdata);                
+//             }
+//             else{
+//                 $username = $data['user_profile']['first_name'] . "_" . $data['user_profile']['last_name'] . "_" . randomStr();
+//                 $username = substr($username, 0, 25);
+//                 while($this->Login_model->check_username($username)){
+//                     $username = $data['user_profile']['first_name'] . "_" . $data['user_profile']['last_name'] . "_" . randomStr();
+//                     $username = substr($username, 0, 25);                    
+//                 }
+//                 $password = randomStr();
+//                 $user['username'] = strtolower($username);
+//                 $user['password'] = md5($password);
+//                 $user['fname'] = ucfirst($data['user_profile']['first_name']);
+//                 $user['lname'] = ucfirst($data['user_profile']['last_name']);
+//                 $user['gender'] = $data['user_profile']['gender'];
+//                 $user['avatarpath'] = 'https://graph.facebook.com/' . $data['user_profile']['id'] . '/picture?type=large';
+//                 $user['email'] = $data['user_profile']['email'];
+//                
+//                 $result = $this->Login_model->new_fb_user($user);
+//                 if($result){
+//                     $newdata = array("userid"=>$result['srno'], "username"=>$result['username'], "fname"=>$result['fname'], "lname"=>$result['lname'], "avatarpath"=>$result['avatarpath']);
+//                     $this->session->set_userdata($newdata);
+//                     redirect(base_url(),'location');
+//                 }
+//             }
+//             $this->load->view('index_view_1', $data);
+//         } else {
+//             // Store users facebook login url
+//             $data['login_url'] = $this->facebook->getLoginUrl(array('scope' => 'email'));
+//             $this->load->view('login_view', $data);
+//         }
+//     }
 
     public function process() {        
         $this->load->model('Login_model');

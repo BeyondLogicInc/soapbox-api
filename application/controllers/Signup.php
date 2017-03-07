@@ -1,21 +1,21 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Signup extends CI_Controller{
-    public function index(){
-        
-        if(!is_logged_in()){
-            redirect(base_url().'Login','location');
-        }
-        
-        $this->load->model('Signup_model');
-        if($this->Signup_model->userinfo_exists($this->session->userdata('userid'))){
-            redirect(base_url(), 'location');
-        }
-        
-        $data['username'] = $this->session->userdata('username');
-        $this->load->model('Signup_model');
-        $data['categories'] = $this->Signup_model->get_categories();
-        $this->load->view('signup_view', $data);
-    }
+//    public function index(){
+//        
+//        if(!is_logged_in()){
+//            redirect(base_url().'Login','location');
+//        }
+//        
+//        $this->load->model('Signup_model');
+//        if($this->Signup_model->userinfo_exists($this->session->userdata('userid'))){
+//            redirect(base_url(), 'location');
+//        }
+//        
+//        $data['username'] = $this->session->userdata('username');
+//        $this->load->model('Signup_model');
+//        $data['categories'] = $this->Signup_model->get_categories();
+//        $this->load->view('signup_view', $data);
+//    }
     
     public function getCategories() {        
         $this->load->model('Signup_model');

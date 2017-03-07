@@ -16,11 +16,5 @@ class Info extends CI_Controller {
             $result = $query->result_array();
             echo json_encode(array('result'=>$result));
         }
-    }
-
-    public function getThreads() {
-        $this->load->model('Index_model');
-        $data = $this->Index_model->populate_feed($this->session->userdata('userid'));
-        echo json_encode(array('result' => $data));
-    }
+    }    
 }
