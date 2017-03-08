@@ -54,6 +54,16 @@ class Index_model extends CI_Model{
         if($query->num_rows()>0){
             $result = $query->result_array();
             for($i=0;$i<count($result);$i++){
+                                               
+                if($result[$i]['imagepath'] == "") {
+                    $result[$i]['imagepath'] = "";
+                }
+                else {
+                    $result[$i]['imagepath'] = "/userdata/" .$result[$i]['uid']. "/". $result[$i]['imagepath'];
+                }
+                
+                $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+                
                 $query_ = $this->db->query("SELECT thread_tags.name FROM thread_tags WHERE tid=" . $result[$i]['srno']);
                 $result[$i]['tags'] = $query_->result_array();
                 $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $result[$i]['srno']);
