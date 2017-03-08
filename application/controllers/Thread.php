@@ -13,7 +13,7 @@ class Thread extends CI_Controller {
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
         
-        echo json_encode(array('result' => $data));
+        echo json_encode(array('results' => $data));
     }
 
 //    public function index($param,$param1){
