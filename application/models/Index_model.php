@@ -62,6 +62,8 @@ class Index_model extends CI_Model{
                     $result[$i]['imagepath'] = "/userdata/" .$result[$i]['uid']. "/". $result[$i]['imagepath'];
                 }
                 
+                $result[$i]['avatarpath'] = "/userdata/" . $result[$i]['uid']. "/". $result[$i]['avatarpath'];
+                                
                 $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
                 
                 $query_ = $this->db->query("SELECT thread_tags.name FROM thread_tags WHERE tid=" . $result[$i]['srno']);

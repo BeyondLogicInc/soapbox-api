@@ -15,6 +15,7 @@
             <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/controllers/Info.php</file>
             <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/controllers/Ajax_Controller.php</file>
             <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/controllers/Logout.php</file>
+            <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/models/Index_model.php</file>
             <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/controllers/Login.php</file>
             <file>file:/Applications/MAMP/htdocs/Soapboxv2/application/controllers/Thread.php</file>
         </group>
