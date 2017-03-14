@@ -63,10 +63,11 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
+	'hostname' => 'db4free.net',
+	'username' => 'chaoticbit',
 	'password' => 'michbharii',
 	'database' => 'soapbox',
+	'port' => 3307,
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
