@@ -359,7 +359,7 @@ $config['encryption_key'] = '';
 |
 */
 $config['sess_driver'] = 'database';
-$config['sess_cookie_name'] = 'cisession';
+$config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 86400;
 $config['sess_save_path'] = 'ci_sessions';
 // $config['sess_save_path'] = NULL;
