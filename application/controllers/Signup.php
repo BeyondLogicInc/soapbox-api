@@ -20,7 +20,57 @@ class Signup extends CI_Controller{
     public function getCategories() {        
         $this->load->model('Signup_model');
         $data = $this->Signup_model->get_categories();
-        echo json_encode(array('response'=>true, 'result'=> $data));
+        echo json_encode(array('response'=>true, 'results'=> $data));
+    }
+    
+    public function saveExtendedInfo() {
+        $data = array();
+        $data['fname'] = $this->security->xss_clean($this->input->post('fname'));
+        $data['lname'] = $this->security->xss_clean($this->input->post('lname'));
+        $data['email'] = $this->security->xss_clean($this->input->post('email'));
+        $data['gender'] = $this->security->xss_clean($this->input->post('gender'));
+        $data['about'] = $this->security->xss_clean($this->input->post('about'));
+        $data['question'] = $this->security->xss_clean($this->input->post('question'));
+        $data['answer'] = $this->security->xss_clean($this->input->post('answer'));
+        $data['categories'] = $this->security->xss_clean($this->input->post('categories'));
+        $data['categories'] = substr($data['categories'], 1, -1);
+        $data['hometown'] = '';
+        $data['city'] = '';
+        $data['profession'] = '';
+        $data['education'] = '';
+        $data['college'] = '';
+        $data['school'] = '';
+        $data['uid'] = $this->session->userdata('userid');
+        $config['upload_path'] = './userdata/' . $this->session->userdata('userid') . '/';
+        $config['allowed_types'] = 'jpg|jpeg|png|JPG|JPEG|PNG';
+        $config['overwrite'] = FALSE;
+        $this->load->library('upload', $config);
+        if(!$this->upload->do_upload('file')){
+            if($data['gender']=="m"){
+                copy(FCPATH . 'assets/images/avatar_male.png' , FCPATH . 'userdata/' . $data['uid'] . '/avatar_male.png');
+                $data['imagepath'] = "avatar_male.png";
+            }
+            else if($data['gender']=="female"){
+                copy(FCPATH . 'assets/images/avatar_female.png' , FCPATH . 'userdata/' . $data['uid'] . '/avatar_female.png');
+                $data['imagepath'] = "avatar_female.png";
+            }
+        }
+        else{
+            $upload_data = $this->upload->data();
+            $data['imagepath'] = $upload_data['file_name'];
+        }
+        
+        $this->load->model('Signup_model');
+        $this->Signup_model->populate($data);
+        $this->session->set_userdata('fname', $data['fname']);
+        $this->session->set_userdata('lname', $data['lname']);
+        $this->session->set_userdata('avatarpath', $data['imagepath']);
+        $data = $this->session->all_userdata();
+        
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
+        $results = array("userid" => $data['userid'], "username"=> $data['username'], "fname"=>$data['fname'], "lname"=>$data['lname'], "avatarpath"=>$data['avatarpath']);
+        echo json_encode($results);
     }
     
     public function validate(){
@@ -47,7 +97,7 @@ class Signup extends CI_Controller{
         $config['overwrite'] = FALSE;
         $this->load->library('upload', $config);
         if(!$this->upload->do_upload('file')){
-            if($data['gender']=="male"){
+            if($data['gender']=="m"){
                 copy(FCPATH . 'assets/images/avatar_male.png' , FCPATH . 'userdata/' . $data['uid'] . '/avatar_male.png');
                 $data['imagepath'] = "avatar_male.png";
             }

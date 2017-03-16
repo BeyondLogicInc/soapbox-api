@@ -94,7 +94,7 @@ class Login extends CI_Controller {
             $npassword = md5($npassword);
             $this->load->model('Login_model');
             $srno = $this->Login_model->signup($nusername, $npassword);
-            $newdata = array("userid"=>$srno,"username"=>$nusername);
+            $newdata = array("response" => true,"userid"=>$srno,"username"=>$nusername, "fname"=>"", "lname"=>"", "avatarpath"=>"");
             $this->session->set_userdata($newdata);
             mkdir(FCPATH . "userdata/" . $this->session->userdata('userid'), 0700, true);
             chmod(FCPATH . "userdata/" . $this->session->userdata('userid'), 0777);            
