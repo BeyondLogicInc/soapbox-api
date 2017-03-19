@@ -24,9 +24,14 @@ class Index_model extends CI_Model{
         return false;
     }    
     public function get_readinglist($uid){
-        $query = $this->db->query("SELECT thread.srno, thread.title, extendedinfo.fname, extendedinfo.lname FROM readinglist, thread, extendedinfo WHERE readinglist.tid=thread.srno AND readinglist.uid=$uid AND thread.uid=extendedinfo.uid ORDER BY readinglist.timestamp DESC LIMIT 5");
+        $query = $this->db->query("SELECT readinglist.timestamp, thread.srno, thread.title, thread.uid, extendedinfo.fname, extendedinfo.lname, extendedinfo.avatarpath FROM readinglist, thread, extendedinfo WHERE readinglist.tid=thread.srno AND readinglist.uid=$uid AND thread.uid=extendedinfo.uid ORDER BY readinglist.timestamp DESC LIMIT 10");
         if($query->num_rows()>0){
-            return $query->result_array();
+            $result = $query->result_array();
+            for($i=0;$i<count($result);$i++){ 
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['avatarpath'];
+                $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+            }
+            return $result;
         }
         return false;
     }

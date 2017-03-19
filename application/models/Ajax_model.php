@@ -139,27 +139,25 @@ class Ajax_model extends CI_Model {
         {
             case 'track_thread':    $query = $this->db->query("INSERT INTO trackthread values(" . (int)$data['tid'] . "," . (int)$data['uid'] . ")");        
                                     $query_ = $this->db->query("SELECT * from trackthread WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
-                                    if($query_->num_rows()>0){
-                                        $data = array('response'=>'true','opt'=>'untrack_thread','link'=>'<a href="javascript:;"><i class="fa fa-check fa-fw"></i> Tracking this thread</a>');
-                                        return $data;
+                                    if($query_->num_rows()>0){                                        
+                                        return true;
+                                    } else {
+                                        return false;
                                     }
-                                    return false;
                                     break;
             case 'untrack_thread':  $query = $this->db->query("DELETE from trackthread WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
-                                    $data = array('response'=>'true','opt'=>'track_thread','link'=>'<a href="javascript:;"><i class="fa fa-binoculars fa-fw"></i> Track this thread</a>');
-                                    return $data;
+                                    return true;                                    
                                     break;
             case 'add_to_list':     $query = $this->db->query("INSERT INTO readinglist(tid, uid) values(" . (int)$data['tid'] . "," . (int)$data['uid'] . ")");
                                     $query_ = $this->db->query("SELECT * from readinglist WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
                                     if($query_->num_rows()>0){
-                                        $data = array('response'=>'true','opt'=>'remove_from_list','link'=>'<a href="javascript:;"><i class="fa fa-check fa-fw"></i> Added to reading list</a>');
-                                        return $data;
+                                        return true;
+                                    } else {
+                                        return false;
                                     }
-                                    return false;
                                     break;
             case 'remove_from_list':$query = $this->db->query("DELETE from readinglist WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
-                                    $data = array('response'=>'true','opt'=>'add_to_list','link'=>'<a href="javascript:;"><i class="fa fa-book fa-fw"></i> Add to reading list</a>');
-                                    return $data;                 
+                                    return true;                 
                                     break;        
             case 'delete_thread':   $query = $this->db->query("SELECT uid, imagepath FROM thread WHERE srno = " . (int)$data['tid']);
                                     if($query->num_rows()>0){
@@ -168,9 +166,8 @@ class Ajax_model extends CI_Model {
                                             $query = $this->db->query("DELETE from thread WHERE srno = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
                                             if($result['imagepath']){
                                                 unlink(FCPATH . 'userdata/' . $data['uid'] . '/' . $result['imagepath']);
-                                            }                                            
-                                            $data = array('response'=>'true','opt'=>'delete_thread');
-                                            return $data;                  
+                                            }                                                                                        
+                                            return true;
                                         }
                                         return false;
                                     }
@@ -178,15 +175,14 @@ class Ajax_model extends CI_Model {
                                     break;
             case 'hide_thread'  :   $query = $this->db->query("INSERT INTO hidethread values(" . (int)$data['tid'] . "," . (int)$data['uid'] . ")");
                                     $query_ = $this->db->query("SELECT * from hidethread WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
-                                    if($query_->num_rows()>0){
-                                        $data = array('response'=>'true','opt'=>'hide_thread');
-                                        return $data;
+                                    if($query_->num_rows()>0){                                        
+                                        return true;
+                                    } else {
+                                        return false;
                                     }
-                                    return false;
                                     break;    
             case 'unhide_thread':   $query = $this->db->query("DELETE from hidethread WHERE tid = " . (int)$data['tid'] . " AND uid = " . (int)$data['uid']);
-                                    $data = array('response'=>'true','opt'=>'unhide_thread');
-                                    return $data;                 
+                                    return true;              
                                     break;                        
         }           
     }

@@ -1,7 +1,14 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Readinglist extends CI_Controller {
     
-    public function _remap($param){
+//    public function getReadingList() {
+//        $data = $this->Index_model->get_readinglist($this->session->userdata('userid'));          
+//        header("Access-Control-Allow-Origin: *");
+//        header("Content-Type: application/json");
+//        echo json_encode(array("response"=>true, "results"=>$data));
+//    }
+    
+    /*public function _remap($param){
         $this->index($param);
     }
     
@@ -47,6 +54,6 @@ class Readinglist extends CI_Controller {
                 $this->load->view('readinglist_view', $data);
             }
         }
-    }
+    }*/
 }
 ?>

@@ -164,13 +164,23 @@ class Ajax_Controller extends CI_Controller{
         $data['opt'] = $param;
         $this->load->model('Ajax_model');
         $result = $this->Ajax_model->thread_options($data);               
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
         if(!$result){
             $data = array("response"=>"false");
         }        
-        $data = $result;
-        header('Access-Control-Allow-Origin: *');
-        header("Content-Type: application/json");
+        else {
+            $data = array("response"=>"true");
+        }        
         echo json_encode($data);
+    }
+    
+    public function getReadingList() {
+        $this->load->model('Index_model');
+        $data = $this->Index_model->get_readinglist($this->session->userdata('userid'));          
+        header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/json");
+        echo json_encode(array("response"=>true, "results"=>$data));
     }
     
     public function update_categories(){
