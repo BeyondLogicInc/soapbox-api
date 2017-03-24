@@ -187,19 +187,16 @@ class Ajax_model extends CI_Model {
         }           
     }
     
-    public function update_categories($data){
-        if($data['cid']!=""){
-            $orig = $this->db->db_debug;
-            $this->db->db_debug = FALSE;                
-            $this->db->query("DELETE from category_user WHERE uid = " . (int)$data['uid']);
-            $array = explode(',',$data['cid']);
-            foreach($array as $item){
-                $this->db->query("INSERT INTO category_user values(" . (int)$item . "," . (int)$data['uid']  . ")");
-            }
-            $this->db->db_debug = $orig;
-            return true;
+    public function update_categories($data){        
+        $orig = $this->db->db_debug;
+        $this->db->db_debug = FALSE;                
+        $this->db->query("DELETE from category_user WHERE uid = " . (int)$data['uid']);
+        $array = explode(',',$data['cid']);
+        foreach($array as $item){
+            $this->db->query("INSERT INTO category_user values(" . (int)$item . "," . (int)$data['uid']  . ")");
         }
-        return false;
+        $this->db->db_debug = $orig;
+        return true;
     }
     
     public function update_category($data){
@@ -362,144 +359,70 @@ class Ajax_model extends CI_Model {
             return false;        
     }
     
-    public function search_all($data){
-        $response = '';
+    public function search_all($data){        
+        $result = [];
+        $result_two = [];
+        $result_three = [];
+        
+        $response = array('threads'=>[], 'people'=>[], 'tags'=>[]);
+        
         $query_one = $this->db->query("SELECT useraccounts.username, thread.srno, thread.uid, thread.description, thread.title, thread.timestamp, category.name as cname, CONCAT(extendedinfo.fname, ' ', extendedinfo.lname) as name, extendedinfo.avatarpath FROM thread, extendedinfo, useraccounts, category WHERE (thread.title LIKE '%" . $data['param'] . "%' OR thread.description LIKE '%" . $data['param'] . "%') AND thread.uid=extendedinfo.uid and thread.cid = category.srno and thread.uid = useraccounts.srno ORDER BY timestamp DESC LIMIT 10");
         $query_two= $this->db->query("SELECT tags.name FROM tags WHERE tags.name LIKE '%" . $data['param'] . "%' LIMIT 15");   
-        $query_three = $this->db->query("SELECT useraccounts.username, useraccounts.srno, CONCAT(extendedinfo.fname, ' ', extendedinfo.lname) as name, extendedinfo.avatarpath FROM useraccounts, extendedinfo WHERE CONCAT(extendedinfo.fname, ' ', extendedinfo.lname)  LIKE '%" . $data['param'] . "%' AND extendedinfo.uid = useraccounts.srno LIMIT 3");
+        $query_three = $this->db->query("SELECT useraccounts.username, useraccounts.srno, CONCAT(extendedinfo.fname, ' ', extendedinfo.lname) as name, extendedinfo.avatarpath, extendedinfo.about FROM useraccounts, extendedinfo WHERE CONCAT(extendedinfo.fname, ' ', extendedinfo.lname)  LIKE '%" . $data['param'] . "%' AND extendedinfo.uid = useraccounts.srno LIMIT 3");
         if($query_one->num_rows() <= 0 && $query_two->num_rows() <= 0 && $query_three->num_rows() <= 0){
-            $response='<div class="pure-u-1"><h4 class="margin0 light txt-center" style="">Couldn\'t find anything :(</h4></div>';
+            $response = array('threads'=>[], 'people'=>[], 'tags'=>[]);
         }
         else{
             if($query_one->num_rows() > 0){
-                $result = $query_one->result_array();
-                $response.='<div class="pure-u-2-3">';
-                $response.='<p class="featured-tags-title" style="border: 0;">Threads</p>';
-                $response.='<div style="padding: 10px 0 10px 0;" class="search--threads">';
-                $response.='<ul>';
-                foreach($result as $item){
-                    $tm = $item['timestamp'];
-                    $response.='<li class="pure-u-1 thread rtd" data-tid="' . $item['srno'] .'" style="padding: 0;border-bottom: 1px solid rgba(235,235,235,0.4);">';
-                    $response.='<div class="pure-g">';
-                    $response.='<div class="pure-u-1" style="margin-bottom: 0px;">';
-                    $response.='<ul>';
-                    $response.='<li>';
-                    $response.='<div class="avatar" style="background-image: url(' . base_url() . 'userdata/' . $item['uid'] . '/' .$item['avatarpath'] .');"></div>';
-                    $response.='</li>';
-                    $response.='<li style="padding-left: 10px;">';
-                    $response.='<p><a href="' . base_url() . $item['username'] . '">' . $item['name'] . '</a><br /><small><a href="javascript:;" class="fg-grayDark link">' . $item['cname'] . '</a><span class="dot-center"></span>' . time_elapsed($item['timestamp']) . '</small></p>';
-                    $response.='</li>';
-                    $response.='</ul>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-1 pointer" style="padding: 0px 0;">';
-                    $response.='<a href="' . base_url() . 'Thread/' . $item['srno'] . '"><h5 class="black" style="color: rgba(0,0,0,0.8);">' . $item['title'] .'</h5></a>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-1 thread-desc">';
-                    $desc = str_replace('<;','&lt;',$item['description']);
-                    $desc = str_replace('>;','&gt;',$desc);
-                    $desc = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $desc);
-                    $response.= $desc;
-                    $response.='</div>';
-                    $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $item['srno']);
-                    $upvotes = $query_upvotes->num_rows();
-                    $query_replies = $this->db->query("SELECT * FROM reply WHERE tid = " . $item['srno']);
-                    $replies = $query_replies->num_rows();
-                    $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $item['srno']);
-                    $views = $query_views->num_rows();
-                    $query_tags = $this->db->query("SELECT * from thread_tags where tid = " . (int)$item['srno']);
-                    $response.='<div class="pure-u-1" style="padding: 10px 0;">';
-                        $query_tags = $this->db->query("SELECT * from thread_tags where tid = " . (int)$item['srno']);
-                        $tags = $query_tags->result_array();
-                        foreach($tags as $tag){
-                            $response.='<a href="' . base_url() . 'Tag/' . $tag['name'] . '" class="tag">' . $tag['name'] . '</a>';
-                        }
-                        $response.='</div>';
-                    $response.='<div class="pure-u-1 thread-stats">';
-                    $response.='<p class="flt-left fg-grayLight">';
-                    if($upvotes==1){
-                    $response.='<span style="padding-right: 20px;">' . $upvotes . ' Upvote</span>';
-                    }
-                    else{
-                        $response.='<span style="padding-right: 20px;">' . $upvotes . ' Upvotes</span>';
-                    }
-                    if($replies==1){
-                        $response.='<span style="padding-right: 20px;">' . $replies . ' Reply</span> ';
-                    }
-                    else{
-                        $response.='<span style="padding-right: 20px;">' . $replies . ' Replies</span> ';
-                    }
-                    if($views==1){
-                        $response.= $views . ' View</p>';
-                    }
-                    else{
-                        $response.= $views . ' Views</p>';
-                    }                    
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</li>';
-                }
-                $response.='</ul>';
-                if($query_one->num_rows() >=10){
-                    $response.='<div class="pure-u-1" style="border-top: 1px solid rgba(100,100,100,0.1);">';
-                    $response.='<i class="fa fa-2x loader fg-cyan fa-circle-o-notch fa-spin" style="display:none;margin: 20px auto;"></i>';
-                    $response.='<div class="load-more" data-opt="search-all" data-opt-val="' . $data['param'] . '">';
-                    $response.='<a href="javascript:;">load more</a>';
-                    $response.='<input type="hidden" class="lmt" value="' . $tm . '"/>';
-                    $response.='</div>';
-                    $response.='</div>';
-                }
-                $response.='</div>';
-                $response.='</div>';
+                $result = $query_one->result_array();                
+                
+                for($i=0;$i<count($result);$i++) {
+                    $desc = $result[$i]['description'];
+                    $desc = strip_tags($desc);                    
+                    $result[$i]['description'] = substr($desc, 0, 400);
+                    
+                    $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+                    
+                    $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['avatarpath'];
+                    
+                    $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $result[$i]['srno']);
+                    $result[$i]['upvotes'] = $query_upvotes->num_rows();
+                    
+                    $query_replies = $this->db->query("SELECT * FROM reply WHERE tid = " . $result[$i]['srno']);
+                    $result[$i]['replies'] = $query_replies->num_rows();
+                    
+                    $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $result[$i]['srno']);
+                    $result[$i]['views'] = $query_views->num_rows();
+                    
+                    $query_tags = $this->db->query("SELECT * from thread_tags where tid = " . $result[$i]['srno']);
+                    $result[$i]['tags'] = $query_tags->result_array();                    
+                }       
+                
+                $response['threads'] = $result;
             }
             else{
-                $response.='<div class="pure-u-2-3"><h4 class="txt-center margin0 fg-grayLight" style="padding: 0 10px 10px;">Couldn\'t find any threads :(</h4></div>';
+                $response['threads'] = [];
             }
-
-            $response.='<div class="pure-u-1-3">';
-            $response.='<div class="search--tags" style="padding-left: 10px;margin-bottom: 20px;max-height: 200px;">';
-            $response.='<p class="featured-tags-title" style="border: 0;">Tags</p>';
-            $response.='<div style="padding: 10px 0 10px 0;">';
+            
             if($query_two->num_rows() > 0){
-                $result = $query_two->result_array();
-                foreach($result as $item){
-                    $response.='<a href="' . base_url() . 'Tag/' . $item['name'] .'" class="tag">' . $item['name'] . '</a>';
-                }
+                $result_two = $query_two->result_array();                                
+                $response['tags'] = $result_two;
             }            
             else{
-                $response.='<div class="pure-u-1"><p class="margin0 fg-grayLight" style="">Couldn\'t find any tags :(</p></div>';
-            }
-            $response.='</div>';
-            $response.='</div>';
-            $response.='<div class="search--people" style="padding-left: 10px;max-height: 200px;">';
-            $response.='<p class="featured-tags-title" style="margin-top: 15px;">People</p>';
-            $response.='<div style="padding: 10px 0 10px 0;">';
-            $response.='<ul>';
+                $response['tags'] = [];
+            }            
 
             if($query_three->num_rows() > 0){
-                $result = $query_three->result_array();
-                foreach($result as $item){
-                    $response.='<li style="padding: 10px 0;">';
-                    $response.='<a class="fg-gray" href="' . base_url() . $item['username'] . '">';
-                    $response.='<div class="pure-g">';
-                    $response.='<div class="pure-u-1-6 ">';
-                    $response.='<div class="avatar" style="background-image: url(' . base_url() . 'userdata/' . $item['srno'] .'/'. $item['avatarpath'] . ');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-5-6" style="padding-left: 5px;">';
-                    $response.='<p class="txt-left margin0" style="line-height: 1.5;">' . $item['name'] . '<br> <span class="fg-gray" style="font-size: 14px;line-height: 2;">' . $item['username'] . '</span></p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a>';
-                    $response.='</li>';
+                $result_three = $query_three->result_array();                
+                for($i=0;$i<count($result_three);$i++) {
+                    $result_three[$i]['avatarpath'] = 'userdata/' . $result_three[$i]['srno'] . '/' . $result_three[$i]['avatarpath'];
                 }
+                $response['people'] = $result_three;
             }        
             else{
-                $response.='<div class="pure-u-1"><p class="margin0" style="">Couldn\'t find anything :(</p></div>';
-            }
-            $response.='</ul>';
-            $response.='</div>';
-            $response.='</div>';
-            $response.='</div>';
-        }
+                $response['people'] = [];
+            }            
+        }        
         return $response;      
     }
     

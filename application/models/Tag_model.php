@@ -9,14 +9,25 @@ class Tag_model extends CI_Model{
                 $result = $query->result_array();
                 for($i=0;$i<count($result);$i++){
                     $result[$i]['numrows'] = $query->num_rows();
+                    $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+                    $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['avatarpath'];
+                    if($result[$i]['imagepath'] == "") {
+                        $result[$i]['imagepath'] = "";
+                    } else {
+                        $result[$i]['imagepath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['imagepath'];
+                    }
                     $query_ = $this->db->query("SELECT thread_tags.name FROM thread_tags WHERE tid=" . $result[$i]['srno']);
                     $result[$i]['tags'] = $query_->result_array();
+                    
                     $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $result[$i]['srno']);
                     $result[$i]['upvotes'] = $query_upvotes->num_rows();
+                    
                     $query_replies = $this->db->query("SELECT * FROM reply WHERE tid = " . $result[$i]['srno']);
                     $result[$i]['replies'] = $query_replies->num_rows();
+                    
                     $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $result[$i]['srno']);
                     $result[$i]['views'] = $query_views->num_rows();
+                    
                     $query_track = $this->db->query("SELECT * from trackthread where tid = " . $result[$i]['srno'] . " and uid = " . $this->session->userdata('userid'));
                     if($query_track->num_rows() > 0){
                         $result[$i]['track'] = true;

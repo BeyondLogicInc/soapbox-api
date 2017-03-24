@@ -19,7 +19,20 @@ class Index_model extends CI_Model{
     public function get_categories_following($uid){
         $query = $this->db->query("SELECT * FROM category LEFT JOIN category_user ON category.srno=category_user.cid AND category_user.uid=$uid ORDER BY uid DESC");
         if($query->num_rows()>0){
-            return $query->result_array();
+            $result = $query->result_array();
+            for($i=0;$i<count($result);$i++){
+                $query_= $this->db->query("SELECT COUNT(*) as thread_count FROM thread WHERE cid=" . (int)$result[$i]['srno']);
+                $result_= $query_->row_array();
+                
+                $query1 = $this->db->query("SELECT COUNT(*) as user_count FROM category_user WHERE cid=" . (int)$result[$i]['srno']);
+                $result1 = $query1->row_array();
+                
+                $result[$i]['srno'] =  intval($result[$i]['srno']);
+                $result[$i]['imagepath'] = 'assets/' . $result[$i]['imagepath'];
+                $result[$i]['thread_count'] = intval($result_['thread_count']);
+                $result[$i]['user_count'] = intval($result1['user_count']);
+            }
+            return $result;
         }
         return false;
     }    
@@ -48,11 +61,23 @@ class Index_model extends CI_Model{
             $result = $query->result_array();
             for($i = 0;$i < count($result);$i++){
                 $query_ = $this->db->query("SELECT useraccounts.username,extendedinfo.fname,extendedinfo.lname,extendedinfo.avatarpath FROM extendedinfo,useraccounts WHERE extendedinfo.uid = " . $result[$i]['uid'] . " AND extendedinfo.uid = useraccounts.srno");
-                $result[$i]['userinfo'] = $query_->result_array();                
+                $info['userinfo'] = $query_->result_array();                                
+
+                $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['upvotes'] = $query_upvotes->num_rows();
+                $query_replies = $this->db->query("SELECT * FROM reply WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['replies'] = $query_replies->num_rows();
+                $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['views'] = $query_views->num_rows();    
+
+                $result[$i]['username'] = $info['userinfo'][0]['username'];
+                $result[$i]['fname'] = $info['userinfo'][0]['fname'];
+                $result[$i]['lname'] = $info['userinfo'][0]['lname'];
+                $result[$i]['avatarpath'] = "/userdata/" .  $result[$i]['uid'] . "/" . $info['userinfo'][0]['avatarpath'];                
             }
             return $result;
         }
-        return false;
+        return [];
     }
     public function populate_feed($uid){
         $query = $this->db->query("SELECT useraccounts.username, extendedinfo.fname, extendedinfo.lname, extendedinfo.avatarpath, thread.srno, thread.timestamp, thread.title, thread.imagepath, thread.coordinates, thread.description, thread.uid, category.name as cname FROM thread, category_user, category, extendedinfo, useraccounts WHERE thread.srno NOT IN (SELECT tid FROM hidethread) AND thread.cid=category_user.cid AND category_user.uid=$uid AND thread.uid=extendedinfo.uid AND category.srno=thread.cid AND useraccounts.srno=thread.uid ORDER BY thread.timestamp DESC LIMIT 10");
@@ -64,10 +89,10 @@ class Index_model extends CI_Model{
                     $result[$i]['imagepath'] = "";
                 }
                 else {
-                    $result[$i]['imagepath'] = "/userdata/" .$result[$i]['uid']. "/". $result[$i]['imagepath'];
+                    $result[$i]['imagepath'] = "userdata/" .$result[$i]['uid']. "/". $result[$i]['imagepath'];
                 }
                 
-                $result[$i]['avatarpath'] = "/userdata/" . $result[$i]['uid']. "/". $result[$i]['avatarpath'];
+                $result[$i]['avatarpath'] = "userdata/" . $result[$i]['uid']. "/". $result[$i]['avatarpath'];
                                 
                 $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
                 

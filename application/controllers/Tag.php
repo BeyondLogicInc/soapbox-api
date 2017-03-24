@@ -1,7 +1,21 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Tag extends CI_Controller {
 
-    public function _remap($param){
+    public function fetchThreads() {
+        $this->load->model('Tag_model');
+        $tag = $this->security->xss_clean($this->input->post('tag'));
+        $result = $this->Tag_model->fetch_thread($tag);
+        if($result) {
+            $data = array("results"=>$result);
+        } else {
+            $data = array("results"=>[]);
+        }
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
+        echo json_encode($data);
+    }
+    
+    /*public function _remap($param){
         $this->index($param);
     }
     
@@ -36,6 +50,6 @@ class Tag extends CI_Controller {
             $data['randomtags'] = $this->Index_model->get_tags();
             $this->load->view('tag_view', $data);
         }
-    }
+    }*/
 }
 ?>

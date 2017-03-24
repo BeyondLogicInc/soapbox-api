@@ -184,16 +184,16 @@ class Ajax_Controller extends CI_Controller{
     }
     
     public function update_categories(){
-        $data['cid'] = $this->security->xss_clean($this->input->post('array'));
-        $data['cid'] = rtrim($data['cid'],",");
+        $data['cid'] = $this->security->xss_clean($this->input->post('categories'));        
+        $data['cid'] = substr($data['cid'], 1, -1);
         $data['uid'] = $this->session->userdata('userid');
         $this->load->model('Ajax_model');
         $result = $this->Ajax_model->update_categories($data);
         if($result){
-            $data = array('response'=>'true');
+            $data = array('response'=>true);
         }
         else{
-            $data = array('response'=>'false');
+            $data = array('response'=>false);
         }
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
@@ -245,12 +245,8 @@ class Ajax_Controller extends CI_Controller{
     public function search_all(){
         $data['param'] = $this->security->xss_clean($this->input->post('key'));
         $this->load->model('Ajax_model');
-        $result = $this->Ajax_model->search_all($data);
-        
-        if(!$result){
-            $result = '<p class="margin0" style="padding: 0 10px 10px;">Couldn\'t find anything :(</p>';
-        }
-        $data = array("content"=>$result);
+        $result = $this->Ajax_model->search_all($data);                
+        $data = array("response"=>$result);
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
         echo json_encode($data);

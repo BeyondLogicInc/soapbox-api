@@ -16,6 +16,16 @@ class Thread extends CI_Controller {
         echo json_encode(array('results' => $data));
     }
 
+    public function getFeaturedThreads() {
+    	$this->load->model('Index_model');
+    	$data = $this->Index_model->get_featured_threads();    	
+    	
+    	header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");      
+        
+        echo json_encode(array('results' => $data));    	
+    }
+
 //    public function index($param,$param1){
 //        
 //        if(!is_logged_in()){
