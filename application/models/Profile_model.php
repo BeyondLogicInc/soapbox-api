@@ -137,8 +137,12 @@ class Profile_model extends CI_Model{
             for($i = 0;$i < count($result);$i++){
                 $query_ = $this->db->query("SELECT useraccounts.username,extendedinfo.fname,extendedinfo.lname,extendedinfo.avatarpath FROM extendedinfo,useraccounts WHERE extendedinfo.uid = " . $result[$i]['uid'] . " AND extendedinfo.uid = useraccounts.srno");
                 $userinfo = $query_->result_array();                
+                $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['views'] = $query_views->num_rows();    
+                $result[$i]['ratio'] = ($result[$i]['upvotes'] / $result[$i]['views']) * 100;
+                $result[$i]['ratio'] = round($result[$i]['ratio']) . "%";
                 $result[$i]['name'] = $userinfo[0]['fname'] . ' ' . $userinfo[0]['lname'];
-                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $userinfo[0]['avatarpath'];                
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $userinfo[0]['avatarpath'];             
                 $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
                 $result[$i]['username'] = $userinfo[0]['username'];
             }
@@ -152,10 +156,10 @@ class Profile_model extends CI_Model{
             $result = $query->result_array();
             for($i = 0;$i < count($result);$i++){
                 $query_ = $this->db->query("SELECT useraccounts.username,extendedinfo.fname,extendedinfo.lname,extendedinfo.avatarpath FROM extendedinfo,useraccounts WHERE extendedinfo.uid = " . $result[$i]['uid'] . " AND extendedinfo.uid = useraccounts.srno");
-                $userinfo = $query_->result_array();                
+                $userinfo = $query_->result_array();                                
                 $result[$i]['description'] = substr(strip_tags($result[$i]['description']), 0, 100);
                 $result[$i]['name'] = $userinfo[0]['fname'] . ' ' . $userinfo[0]['lname'];
-                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $userinfo[0]['avatarpath'];                
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $userinfo[0]['avatarpath'];
                 $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
                 $result[$i]['username'] = $userinfo[0]['username'];
             }
