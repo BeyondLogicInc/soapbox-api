@@ -147,7 +147,7 @@ class Profile_model extends CI_Model{
         return [];
     }
     public function get_top_replies($uid){
-        $query = $this->db->query("select reply.srno, reply.description, reply.uid, reply.timestamp, COUNT(upvotes_to_replies.rid) AS upvotes FROM reply LEFT JOIN upvotes_to_replies ON reply.srno = upvotes_to_replies.rid WHERE reply.uid = ". (int)$uid. " GROUP BY reply.srno ORDER BY upvotes DESC LIMIT 5");
+        $query = $this->db->query("select reply.srno, reply.description, reply.uid, reply.tid, reply.timestamp, COUNT(upvotes_to_replies.rid) AS upvotes FROM reply LEFT JOIN upvotes_to_replies ON reply.srno = upvotes_to_replies.rid WHERE reply.uid = ". (int)$uid. " GROUP BY reply.srno ORDER BY upvotes DESC LIMIT 5");
         if($query->num_rows() > 0){
             $result = $query->result_array();
             for($i = 0;$i < count($result);$i++){
@@ -163,6 +163,25 @@ class Profile_model extends CI_Model{
         }
         return [];
     }
+
+    public function get_correct_replies($uid) {
+        $query = $this->db->query("SELECT reply.srno, reply.description, reply.timestamp, reply.uid, reply.tid FROM reply WHERE reply.uid = " . (int)$uid. " AND correct = 1");
+        if($query->num_rows() > 0) {
+            $result = $query->result_array();
+            for($i = 0;$i < count($result);$i++) {
+                $query_ = $this->db->query("SELECT useraccounts.username,extendedinfo.fname,extendedinfo.lname,extendedinfo.avatarpath FROM extendedinfo,useraccounts WHERE extendedinfo.uid = " . $result[$i]['uid'] . " AND extendedinfo.uid = useraccounts.srno");
+                $userinfo = $query_->result_array();                
+                $result[$i]['description'] = substr(strip_tags($result[$i]['description']), 0, 100);
+                $result[$i]['name'] = $userinfo[0]['fname'] . ' ' . $userinfo[0]['lname'];
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $userinfo[0]['avatarpath'];                
+                $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+                $result[$i]['username'] = $userinfo[0]['username'];
+            }
+            return $result;
+        }
+        return [];
+    }
+
     public function get_hidden_threads($uid){
         $query = $this->db->query("SELECT useraccounts.username,CONCAT(extendedinfo.fname,' ',extendedinfo.lname) as name,extendedinfo.avatarpath,thread.srno,thread.uid,thread.title FROM useraccounts,extendedinfo,thread,hidethread WHERE hidethread.uid = " . (int)$uid . " AND hidethread.tid = thread.srno AND thread.uid = useraccounts.srno AND thread.uid = extendedinfo.uid");
         if($query->num_rows() > 0){

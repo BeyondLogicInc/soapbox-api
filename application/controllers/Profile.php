@@ -12,7 +12,9 @@ class Profile extends CI_Controller {
         $data['correct_reply_count'] = $this->Profile_model->get_correct_reply_count($this->session->userdata('userid'));
         $data['top_threads'] = $this->Profile_model->get_top_threads($this->session->userdata('userid'));
         $data['top_replies'] = $this->Profile_model->get_top_replies($this->session->userdata('userid'));        
-        $response = array("thread_count"=>$data['thread_count'], "reply_count"=>$data['reply_count'], "correct_reply_count"=>$data['correct_reply_count'], "top_threads"=>$data['top_threads'], "top_replies"=>$data['top_replies']);
+        $data['correct_replies'] = $this->Profile_model->get_correct_replies($this->session->userdata('userid'));
+
+        $response = array("thread_count"=>$data['thread_count'], "reply_count"=>$data['reply_count'], "correct_reply_count"=>$data['correct_reply_count'], "top_threads"=>$data['top_threads'], "top_replies"=>$data['top_replies'], "correct_replies"=>$data['correct_replies']);
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
         echo json_encode($response);
