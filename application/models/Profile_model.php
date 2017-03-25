@@ -165,7 +165,7 @@ class Profile_model extends CI_Model{
     }
 
     public function get_correct_replies($uid) {
-        $query = $this->db->query("SELECT reply.srno, reply.description, reply.timestamp, reply.uid, reply.tid FROM reply WHERE reply.uid = " . (int)$uid. " AND correct = 1");
+        $query = $this->db->query("select reply.srno, reply.description, reply.uid, reply.tid, reply.timestamp, COUNT(upvotes_to_replies.rid) AS upvotes FROM reply LEFT JOIN upvotes_to_replies ON reply.srno = upvotes_to_replies.rid WHERE reply.uid = ". (int)$uid. " AND correct = 1 GROUP BY reply.srno ORDER BY upvotes DESC LIMIT 5");
         if($query->num_rows() > 0) {
             $result = $query->result_array();
             for($i = 0;$i < count($result);$i++) {

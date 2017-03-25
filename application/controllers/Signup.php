@@ -22,7 +22,7 @@ class Signup extends CI_Controller{
         $data = $this->Signup_model->get_categories();
         echo json_encode(array('response'=>true, 'results'=> $data));
     }
-    
+        
     public function saveExtendedInfo() {
         $data = array();
         $data['fname'] = $this->security->xss_clean($this->input->post('fname'));
