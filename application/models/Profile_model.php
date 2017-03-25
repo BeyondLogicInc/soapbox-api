@@ -184,10 +184,13 @@ class Profile_model extends CI_Model{
 
     public function get_hidden_threads($uid){
         $query = $this->db->query("SELECT useraccounts.username,CONCAT(extendedinfo.fname,' ',extendedinfo.lname) as name,extendedinfo.avatarpath,thread.srno,thread.uid,thread.title FROM useraccounts,extendedinfo,thread,hidethread WHERE hidethread.uid = " . (int)$uid . " AND hidethread.tid = thread.srno AND thread.uid = useraccounts.srno AND thread.uid = extendedinfo.uid");
-        if($query->num_rows() > 0){
+        if($query->num_rows() > 0) {
             $result = $query->result_array();
+            for ($i = 0;$i < count($result);$i++) { 
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['avatarpath'];
+            }
             return $result;
         }
-        return false;
+        return [];
     }
 }

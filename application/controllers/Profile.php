@@ -19,6 +19,15 @@ class Profile extends CI_Controller {
         header("Content-Type: application/json");
         echo json_encode($response);
     }
+
+    public function getHiddenThreads() {
+        $this->load->model('Profile_model');
+        $data['get_hidden_threads'] = $this->Profile_model->get_hidden_threads($this->session->userdata('userid'));   
+        $response = array("results"=>$data['get_hidden_threads']);
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
+        echo json_encode($response);
+    }
     
     public function index()
     {
