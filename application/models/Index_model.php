@@ -124,8 +124,9 @@ class Index_model extends CI_Model{
         return false;
     }
     
-    public function get_notifications($uid){
+    public function getNotifications($uid){
         $response = '';
+        $responseArray = array();
         $query = $this->db->query("SELECT * FROM notifications WHERE notifications.uid =" . (int)$uid . " ORDER BY readflag,timestamp DESC");
         if($query->num_rows() > 0){
             $result = $query->result_array();
@@ -133,107 +134,177 @@ class Index_model extends CI_Model{
                 if($item['type']=='1'){
                 $query_ = $this->db->query("SELECT extendedinfo.uid as euid,extendedinfo.avatarpath,CONCAT(extendedinfo.fname, ' ' ,extendedinfo.lname) as name,reply.tid,reply.srno, thread.title FROM thread, reply, extendedinfo where reply.srno = " . $item['ref']." and reply.tid = thread.srno and reply.uid = extendedinfo.uid");
                 $result_ = $query_->row_array();
-                    if($item['readflag']!='0'){
-                        $response.='<li>';
-                    }
-                    else{
-                        $response.='<li class="active-notif">';
-                    }
-                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $item['ref'] . '"><div class="pure-g">';
-                    $response.='<div class="pure-u-1-8">';
-                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
-                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' left a reply on your thread "' . substr($result_['title'],0,20) . '..."</p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a></li>';
+                if(!empty($result_['tid'])) {
+                    array_push($responseArray, array(
+                        'tid'=>$result_['tid'],
+                        'ref'=>$item['ref'],
+                        'type'=>$item['type'],
+                        'read'=>$item['readflag'],
+                        'avatarpath'=>'userdata/' . $result_['euid'] . '/'. $result_['avatarpath'],
+                        'from'=>$result_['name'],
+                        'action'=>'left a reply on your thread',                        
+                        'for'=>substr($result_['title'],0,40),
+                        'timestamp'=>time_elapsed($item['timestamp']),
+                        'content'=>'<p style="font-family: \'OpenSans\';font-size: 13"><b style="font-family: \'OpenSans-SemiBold\'">' . $result_['name'] . '</b> left a reply on your thread "' . substr($result_['title'],0,40) . '...</p>'
+                    ));
+                }
+//                    if($item['readflag']!='0'){
+//                        $response.='<li>';
+//                    }
+//                    else{
+//                        $response.='<li class="active-notif">';
+//                    }
+//                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $item['ref'] . '"><div class="pure-g">';
+//                    $response.='<div class="pure-u-1-8">';
+//                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
+//                    $response.='</div>';
+//                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
+//                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' left a reply on your thread "' . substr($result_['title'],0,20) . '..."</p>';
+//                    $response.='</div>';
+//                    $response.='</div>';
+//                    $response.='</a></li>';
                 }
                 if($item['type']=='2'){
                 $query_ = $this->db->query("SELECT extendedinfo.uid as euid,extendedinfo.avatarpath,CONCAT(extendedinfo.fname ,' ', extendedinfo.lname) as name,reply.description,reply.tid,replies_to_reply.srno,replies_to_reply.rid from thread,reply,replies_to_reply,extendedinfo where replies_to_reply.srno=" . $item['ref'] . " and replies_to_reply.rid = reply.srno and reply.tid = thread.srno and replies_to_reply.uid = extendedinfo.uid");
                 $result_ = $query_->row_array();
-                    if($item['readflag']!='0'){
-                        $response.='<li>';
-                    }
-                    else{
-                        $response.='<li class="active-notif">';
-                    }
-                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $result_['rid'] . '"><div class="pure-g">';
-                    $response.='<div class="pure-u-1-8">';
-                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
-                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' left a comment on your reply "' . substr(strip_tags($result_['description']),0,20) . '..."</p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a></li>';
+                if(!empty($result_['tid'])) {
+                    array_push($responseArray, array(
+                        'tid'=>$result_['tid'],
+                        'ref'=>$item['ref'],
+                        'type'=>$item['type'],
+                        'read'=>$item['readflag'],
+                        'avatarpath'=>'userdata/' . $result_['euid'] . '/'. $result_['avatarpath'],
+                        'from'=>$result_['name'],
+                        'action'=>'left a comment on your reply',                        
+                        'for'=>substr(strip_tags($result_['description']),0,40),
+                        'timestamp'=>time_elapsed($item['timestamp']),
+                        'content'=>'<p style="font-family: \'OpenSans\';font-size: 13"><b style="font-family: \'OpenSans-SemiBold\'">' . $result_['name'] . '</b> left a comment on your reply "' . substr(strip_tags($result_['description']),0,40) . '...</p>'
+                    ));
+                }
+//                    if($item['readflag']!='0'){
+//                        $response.='<li>';
+//                    }
+//                    else{
+//                        $response.='<li class="active-notif">';
+//                    }
+//                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $result_['rid'] . '"><div class="pure-g">';
+//                    $response.='<div class="pure-u-1-8">';
+//                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
+//                    $response.='</div>';
+//                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
+//                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' left a comment on your reply "' . substr(strip_tags($result_['description']),0,20) . '..."</p>';
+//                    $response.='</div>';
+//                    $response.='</div>';
+//                    $response.='</a></li>';
                 }
                 if($item['type']=='3'){
                 $query_ = $this->db->query("SELECT extendedinfo.uid as euid,extendedinfo.avatarpath,CONCAT(extendedinfo.fname ,' ', extendedinfo.lname) as name,thread.srno,thread.title from thread,extendedinfo,upvotes_to_thread where upvotes_to_thread.srno=" . $item['ref'] . " and thread.srno = upvotes_to_thread.tid and upvotes_to_thread.uid = extendedinfo.uid");
                 $result_ = $query_->row_array();
-                    if($item['readflag']!='0'){
-                        $response.='<li>';
-                    }
-                    else{
-                        $response.='<li class="active-notif">';
-                    }
-                    $response.='<a href="' . base_url() . 'Thread/' . $result_['srno'] . '/' . $item['ref'] . '"><div class="pure-g">';
-                    $response.='<div class="pure-u-1-8">';
-                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
-                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' upvoted "' . substr($result_['title'],0,20) . '..."</p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a></li>';
+                if(!empty($result_['tid'])) {
+                    array_push($responseArray, array(
+                        'tid'=>$result_['tid'],
+                        'ref'=>$item['ref'],
+                        'type'=>$item['type'],
+                        'read'=>$item['readflag'],
+                        'avatarpath'=>'userdata/' . $result_['euid'] . '/'. $result_['avatarpath'],
+                        'from'=>$result_['name'],
+                        'action'=>'upvoted',
+                        'for'=>substr($result_['title'],0,40),
+                        'timestamp'=>time_elapsed($item['timestamp']),
+                        'content'=>'<p style="font-family: \'OpenSans\';font-size: 13"><b style="font-family: \'OpenSans-SemiBold\'">' . $result_['name'] . '</b> upvoted "' . substr($result_['title'],0,40) . '...</p>'
+                    ));
+                }
+//                    if($item['readflag']!='0'){
+//                        $response.='<li>';
+//                    }
+//                    else{
+//                        $response.='<li class="active-notif">';
+//                    }
+//                    $response.='<a href="' . base_url() . 'Thread/' . $result_['srno'] . '/' . $item['ref'] . '"><div class="pure-g">';
+//                    $response.='<div class="pure-u-1-8">';
+//                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
+//                    $response.='</div>';
+//                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
+//                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' upvoted "' . substr($result_['title'],0,20) . '..."</p>';
+//                    $response.='</div>';
+//                    $response.='</div>';
+//                    $response.='</a></li>';
                 }
                 if($item['type']=='4'){
                 $query_ = $this->db->query("SELECT extendedinfo.uid as euid,extendedinfo.avatarpath, CONCAT(extendedinfo.fname,' ',extendedinfo.lname) as name, reply.description, reply.tid, reply.srno FROM thread, reply, extendedinfo, upvotes_to_replies where upvotes_to_replies.srno = " . $item['ref']." and reply.tid = thread.srno and upvotes_to_replies.rid=reply.srno and upvotes_to_replies.uid = extendedinfo.uid");
                 $result_ = $query_->row_array();
-                    if($item['readflag']!='0'){
-                        $response.='<li>';
-                    }
-                    else{
-                        $response.='<li class="active-notif">';
-                    }
-                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $result_['srno'] . '"><div class="pure-g">';
-                    $response.='<div class="pure-u-1-8">';
-                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
-                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' upvoted reply "' . substr(strip_tags($result_['description']),0,30) . '..."</p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a></li>';
+                if(!empty($result_['tid'])) {
+                    array_push($responseArray, array(
+                        'tid'=>$result_['tid'],
+                        'ref'=>$item['ref'],
+                        'type'=>$item['type'],
+                        'read'=>$item['readflag'],
+                        'avatarpath'=>'userdata/' . $result_['euid'] . '/'. $result_['avatarpath'],
+                        'from'=>$result_['name'],
+                        'action'=>'upvoted reply',
+                        'for'=>substr(strip_tags($result_['description']),0,40),
+                        'timestamp'=>time_elapsed($item['timestamp']),
+                        'content'=>'<p style="font-family: \'OpenSans\';font-size: 13"><b style="font-family: \'OpenSans-SemiBold\'">' . $result_['name'] . '</b> upvoted reply "' . substr(strip_tags($result_['description']),0,40) . '...</p>'
+                    ));
+                }
+//                    if($item['readflag']!='0'){
+//                        $response.='<li>';
+//                    }
+//                    else{
+//                        $response.='<li class="active-notif">';
+//                    }
+//                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tid'] . '/' . $item['ref'] . '/#r' . $result_['srno'] . '"><div class="pure-g">';
+//                    $response.='<div class="pure-u-1-8">';
+//                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
+//                    $response.='</div>';
+//                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
+//                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' upvoted reply "' . substr(strip_tags($result_['description']),0,30) . '..."</p>';
+//                    $response.='</div>';
+//                    $response.='</div>';
+//                    $response.='</a></li>';
                 }
                 if($item['type']=='5'){
 //search here                    
                 $query_ = $this->db->query("SELECT extendedinfo.uid as euid,extendedinfo.avatarpath,CONCAT(extendedinfo.fname ,' ', extendedinfo.lname) as name,reply.description,reply.tid as tsrno,reply.srno FROM thread, reply, extendedinfo where reply.srno = " . $item['ref']." and reply.tid = thread.srno and thread.uid = extendedinfo.uid");
                 $result_ = $query_->row_array();
-                    if($item['readflag']!='0'){
-                        $response.='<li>';
-                    }
-                    else{
-                        $response.='<li class="active-notif">';
-                    }
-                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tsrno'] . '/' . $item['ref'] . '/#r' . $item['ref'] . '"><div class="pure-g">';
-                    $response.='<div class="pure-u-1-8">';
-                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
-                    $response.='</div>';
-                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
-                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' marked your reply as correct.</p>';
-                    $response.='</div>';
-                    $response.='</div>';
-                    $response.='</a></li>';
+                if(!empty($result_['tsrno'])) {
+                    array_push($responseArray, array(
+                        'tid'=>$result_['tsrno'],
+                        'ref'=>$item['ref'],
+                        'type'=>$item['type'],
+                        'read'=>$item['readflag'],
+                        'avatarpath'=>'userdata/' . $result_['euid'] . '/'. $result_['avatarpath'],
+                        'from'=>$result_['name'],
+                        'action'=>'marked your reply as correct.',
+                        'for'=>'',
+                        'timestamp'=>time_elapsed($item['timestamp']),
+                        'content'=>'<p style="font-family: \'OpenSans\';font-size: 13"><b style="font-family: \'OpenSans-SemiBold\'">' . $result_['name'] . '</b> marked your reply as correct'
+                    ));
+                }
+//                    if($item['readflag']!='0'){
+//                        $response.='<li>';
+//                    }
+//                    else{
+//                        $response.='<li class="active-notif">';
+//                    }
+//                    $response.='<a href="' . base_url() . 'Thread/' . $result_['tsrno'] . '/' . $item['ref'] . '/#r' . $item['ref'] . '"><div class="pure-g">';
+//                    $response.='<div class="pure-u-1-8">';
+//                    $response.='<div class="avatar" style="background-image: url(\'' . userdata_url($result_['euid'], $result_['avatarpath']) . '\');"></div>';
+//                    $response.='</div>';
+//                    $response.='<div class="pure-u-7-8" style="padding-left: 10px;">';
+//                    $response.='<p class="txt-left margin0">' . $result_['name'] . ' marked your reply as correct.</p>';
+//                    $response.='</div>';
+//                    $response.='</div>';
+//                    $response.='</a></li>';
                 }
             }
-            return $response;
+            return $responseArray;
         }
-        return false;    
+        return [];    
     }
     
-    public function notification_count($uid){
-        $query = $this->db->query("select * from notifications where uid = " . (int)$uid . " and readflag = 0");
+    public function getNotificationCount($uid){
+        $query = $this->db->query("select * from notifications where notifications.uid = " . (int)$uid . " and readflag = 0");
         $count = $query->num_rows();
         return $count;
     }

@@ -510,18 +510,13 @@ class Ajax_Controller extends CI_Controller{
         echo json_encode($data);
     }
     
-    public function wait_for_notification(){
+    public function getNotifications(){
         $data['uid'] = $this->session->userdata('userid');
-        $this->load->model('Ajax_model');
-        $result = $this->Ajax_model->wait_for_notification($data);
-        $cnt = $this->Ajax_model->get_notification_count($data);
+        $this->load->model('Index_model');
+        $result = $this->Index_model->getNotifications($this->session->userdata('userid'));
+        $cnt = $this->Index_model->getNotificationCount($this->session->userdata('userid'));       
         
-        if(!$result){
-            $data = array("response"=>"false");
-        }
-        else{
-            $data = array("response"=>"true","content"=>$result,"cnt"=>$cnt);
-        }
+        $data = array("response"=>"true","results"=>$result,"unreadcnt"=>$cnt);        
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
         echo json_encode($data);
