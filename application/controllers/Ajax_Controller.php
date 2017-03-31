@@ -175,6 +175,20 @@ class Ajax_Controller extends CI_Controller{
         echo json_encode($data);
     }
     
+    public function getThreadsByCategory() {
+        $cid = $this->security->xss_clean($this->input->post('cid'));
+        if(empty($cid)) {
+            header("Access-Control-Allow-Origin: *");
+            header("Content-Type: application/json");        
+            echo json_encode(array("response"=>false, "message"=>"Missing argument 1"));
+        }
+        $this->load->model('Ajax_model');        
+        $results = $this->Ajax_model->getThreadsByCategory($cid);
+        header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/json");        
+        echo json_encode(array("response"=>true, "results"=>$results));
+    }
+    
     public function getReadingList() {
         $this->load->model('Index_model');
         $data = $this->Index_model->get_readinglist($this->session->userdata('userid'));          

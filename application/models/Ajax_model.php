@@ -20,6 +20,52 @@ class Ajax_model extends CI_Model {
             return false;
         }
     }
+    
+    public function getThreadsByCategory($cid) {
+        $query = $this->db->query("SELECT useraccounts.username, thread.srno, thread.imagepath, thread.uid, thread.description, thread.title, thread.timestamp, category.name as cname, extendedinfo.fname, extendedinfo.lname, extendedinfo.avatarpath FROM thread, extendedinfo, useraccounts, category WHERE thread.uid=extendedinfo.uid and thread.cid = " . (int)$cid . " and category.srno = thread.cid and thread.uid = useraccounts.srno ORDER BY timestamp DESC LIMIT 10");
+        if($query->num_rows()>0) {
+            $result = $query->result_array();
+            for($i=0;$i<count($result);$i++){                
+                $result[$i]['description'] = substr(strip_tags($result[$i]['description']), 0, 250);
+                $result[$i]['timestamp'] = time_elapsed($result[$i]['timestamp']);
+                $result[$i]['avatarpath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['avatarpath'];
+                if($result[$i]['imagepath'] == "") {
+                    $result[$i]['imagepath'] = "";
+                } else {
+                    $result[$i]['imagepath'] = 'userdata/' . $result[$i]['uid'] . '/' . $result[$i]['imagepath'];
+                }
+                $query_ = $this->db->query("SELECT thread_tags.name FROM thread_tags WHERE tid=" . $result[$i]['srno']);
+                $result[$i]['tags'] = $query_->result_array();
+
+                $query_upvotes = $this->db->query("SELECT * FROM upvotes_to_thread WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['upvotes'] = $query_upvotes->num_rows();
+
+                $query_replies = $this->db->query("SELECT * FROM reply WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['replies'] = $query_replies->num_rows();
+
+                $query_views = $this->db->query("SELECT * FROM views WHERE tid = " . $result[$i]['srno']);
+                $result[$i]['views'] = $query_views->num_rows();
+
+                $query_track = $this->db->query("SELECT * from trackthread where tid = " . $result[$i]['srno'] . " and uid = " . $this->session->userdata('userid'));
+                if($query_track->num_rows() > 0){
+                    $result[$i]['track'] = true;
+                }
+                else{
+                    $result[$i]['track'] = false;
+                }
+                $query_readinglist = $this->db->query("SELECT * from readinglist where tid = " . $result[$i]['srno'] . " and uid = " . $this->session->userdata('userid'));
+                if($query_readinglist->num_rows() > 0){
+                    $result[$i]['reading'] = true;
+                }
+                else{
+                    $result[$i]['reading'] = false;
+                }
+            }
+            return $result;
+        }
+        return [];
+    }
+    
     public function post_thread($data){
         
         $query = $this->db->query("INSERT INTO thread(title,description,imagepath,coordinates,cid,uid) VALUES('" . $data['title'] . "','" . safeThreadContent($data['desc']) . "'," . $this->db->escape($data['filename']) . "," . $this->db->escape($data['coordinates']) . "," . (int)$data['category'] . "," . (int)$data['uid'] . ")");
