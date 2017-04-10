@@ -1205,7 +1205,7 @@ class Ajax_model extends CI_Model {
         $this->db->query("UPDATE notifications SET sent=1 WHERE uid = " . (int)$data['uid'] . "");
     }
     public function mark_read($data){
-        $this->db->query("UPDATE notifications SET readflag=1 WHERE uid = " . (int)$data['uid'] . "");
+        $this->db->query("UPDATE notifications SET readflag=1 WHERE uid = " . (int)$data['uid'] . "");        
     }
     
     public function pull_notifications($uid){

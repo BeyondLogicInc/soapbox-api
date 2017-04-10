@@ -530,7 +530,16 @@ class Ajax_Controller extends CI_Controller{
         $result = $this->Index_model->getNotifications($this->session->userdata('userid'));
         $cnt = $this->Index_model->getNotificationCount($this->session->userdata('userid'));       
         
-        $data = array("response"=>"true","results"=>$result,"unreadcnt"=>$cnt);        
+        $data = array("response"=>true,"results"=>$result,"unreadcnt"=>$cnt);        
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
+        echo json_encode($data);
+    }
+
+    public function getUnreadNotificationCount() {        
+        $this->load->model('Index_model');
+        $cnt = $this->Index_model->getNotificationCount($this->session->userdata('userid'));
+        $data = array("response"=>"true","count"=>$cnt);
         header('Access-Control-Allow-Origin: *');
         header("Content-Type: application/json");
         echo json_encode($data);
@@ -542,10 +551,13 @@ class Ajax_Controller extends CI_Controller{
         $result = $this->Ajax_model->reset_notifications($data);
     }
     
-    public function mark_read(){
+    public function mark_notifications_read(){
         $data['uid'] = $this->session->userdata('userid');
         $this->load->model('Ajax_model');
         $result = $this->Ajax_model->mark_read($data);
+        header('Access-Control-Allow-Origin: *');
+        header("Content-Type: application/json");
+        echo json_encode(array("response"=>"true"));
     }
     public function pull_notifications(){
         $data = $this->session->userdata('userid');
