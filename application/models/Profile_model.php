@@ -24,7 +24,7 @@ class Profile_model extends CI_Model{
     }
     
     public function get_correct_reply_count($uid) {
-        $query = $this->db->query("SELECT * FROM REPLY where uid = " . (int)$uid . " AND correct = 1");
+        $query = $this->db->query("SELECT * FROM reply where uid = " . (int)$uid . " AND correct = 1");
         $result = $query->num_rows();
         return $result;
     }
